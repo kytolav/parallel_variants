@@ -162,17 +162,7 @@ def get_args():
     parser.add_argument('--bam_list', help='Space separated paths to FASTQ '
                         'input files. At least one is required.', nargs='+',
                         required=True)
-    parser.add_argument('--out_dir', help='Output root directory under which '
-                        'new, results containing folder will be created.',
-                        required=True)
-    parser.add_argument('--subsample', help='Fraction of reads to be sampled '
-                        '[0,1]. Adjust according to input file sizes. Affects '
-                        'greatly QC analysis run time.',
-                        default=reads.DEFAULT_SUBSAMPLE, type=float)
-    parser.add_argument('--rscript_path', help='Path to Rscript.',
-                        default=ToolPath.rscript)
     return vars(parser.parse_args())
-
 
 
 def main():
