@@ -150,8 +150,7 @@ def create_tmp_directory(path_basename):
         random_name = str(uuid.uuid4())
 
     # Creating the directory
-    new_path = os.path.exists(os.path.join(path_basename, random_name))
-    os.system("mkdir %s " % new_path)
+    os.system("mkdir %s " % os.path.join(path_basename, new_path))
     return new_path
 
 
