@@ -5,6 +5,7 @@
 import argparse
 import uuid
 import os
+import math
 
 
 VARIANT_OUTPUT_DIRECTORY_BASENAME = 'variants'
@@ -28,14 +29,50 @@ def run_analysis(bam_list, out_dir = VARIANT_OUTPUT_DIRECTORY_BASENAME):
         tmp_path = create_tmp_directory(TEMPORARY_FILES_DIRECTORY_BASENAME)
 
         # Splitting the bam
-        bam_chunk_list = split_bam(bam_file, tmp_path)
+        bam_chunk_list = split_bam(bam_file, tmp_path, NUMBER_OF_CHUNKS)
 
         # Running variant calling in parallel using simple unix parallel
-        call_variants_parallel(tmp_path)
+        call_variants_parallel(bam_chunk_list, tmp_path)
 
         # Gathering results into single VCF
         gather_results(bam_file, tmp_path, VARIANT_OUTPUT_DIRECTORY_BASENAME)
 
+
+def call_variants_parallel(bam_chunk_list, tmp_path):
+    """Calls variants using a parallel VarScan launcher"""
+
+
+def split_bam(bam_file, output_dir, number_of_chunks):
+    """Split the BAM file into a defined number of chunks. The input BAM file must be sorted."""
+    # Saving the BAM header
+    cmd = "samtools view -H %s > %s/header.txt" % (bam_file, output_dir)
+    os.system(cmd)
+    # Counting lines of the file
+    line_count = bam_line_count(bam_file)
+    lines_per_chunk = math.ceil(line_count * 1.0 / number_of_chunks)
+    # Splitting the file with samtools and unix tools
+    cmd = "samtools view %s |split -l %d - %s/chunk_" % (bam_file, lines_per_chunk, output_dir)
+    os.system(cmd)
+    # Appending header to each chunk
+    chunks = [os.path.realpath(x) for x in os.listdir(output_dir) if 'header' not in x]
+    for chunk in chunks:
+        chunk_base = os.path.basename(chunk)
+        cmd = "cat %s/header.txt %s/%s > %s/%s_tmp" % (output_dir, output_dir, chunk_base,
+                                                                  output_dir, chunk_base)
+        os.system(cmd)
+        # Renaming
+        cmd = "mv %s/%s_tmp %s/%s" % (output_dir, chunk_base, output_dir, chunk_base)
+        os.system(cmd)
+    return chunks
+
+
+def bam_line_count(bam_file):
+    """Counting lines in a BAM file"""
+    cmd = "samtools view %s |wc -l > tmp_line_count.txt" % bam_file
+    os.system(cmd)
+    with open('tmp_line_count.txt') as f:
+        count = "".join(f.readlines()[0].split())
+    return int(count)
 
 
 def create_tmp_directory(path_basename):
