@@ -10,8 +10,10 @@ import math
 
 VARIANT_OUTPUT_DIRECTORY_BASENAME = 'variants'
 TEMPORARY_FILES_DIRECTORY_BASENAME = 'tmp'
-NUMBER_OF_CORES = 20
+NUMBER_OF_CORES = 2
 NUMBER_OF_CHUNKS = 100
+PATH_TO_REFERENCE_GENOME_HG19 = ''
+PATH_TO_VARSCAN = '/Users/kytolav/tools/VarScan.v2.3.9.jar'
 
 
 def run_analysis(bam_list, out_dir = VARIANT_OUTPUT_DIRECTORY_BASENAME):
@@ -40,6 +42,12 @@ def run_analysis(bam_list, out_dir = VARIANT_OUTPUT_DIRECTORY_BASENAME):
 
 def call_variants_parallel(bam_chunk_list, tmp_path):
     """Calls variants using a parallel VarScan launcher"""
+    cmd_parallel = "parallel -j %d" % NUMBER_OF_CORES
+    cmd_call = ' "samtools mpileup -B -f %s {} |java -jar %s mpileup2snp --output-vcf 1 --output-file %s/{}.vcf"' % (PATH_TO_REFERENCE_GENOME_HG19, PATH_TO_VARSCAN, tmp_path)
+    cmd_files = " ::: " + " ".join(bam_chunk_list)
+    cmd = cmd_parallel + cmd_call + cmd_files
+    print(cmd)
+    # os.system(cmd)
 
 
 def split_bam(bam_file, output_dir, number_of_chunks):
