@@ -31,4 +31,4 @@ The repository contains a simple Flask web app to track the execution of variant
 ~~~~
 run_server.sh 8008
 ~~~~
-This will start a local HTTP server and serves the app at A [link](http://localhost:8008). Note that the web app by default tracks changes inside the static folder `tmp` and this hard coded folder must be changed if another folder is used for intermediary files.
+This will start a local HTTP server and serves the app at [link](http://localhost:8008 "http://localhost:8008"). Note that the web app by default tracks changes inside the static folder `tmp` and this hard coded folder must be changed if another folder is used for intermediary files.

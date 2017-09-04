@@ -81,13 +81,15 @@ def gather_results(bam_file, tmp_path, output_directory):
 def call_variants_parallel(bam_chunk_list, tmp_path, n_cores):
     """Calls variants using a parallel VarScan launcher"""
     # Ignoring empty files
+    print('Creating mpileup files')
     nonempty_chunks = [x for x in bam_chunk_list if not os.stat(os.path.join(tmp_path, x)).st_size == 0]
     cmd_parallel = "parallel -j %d" % n_cores
-    cmd_call = ' "samtools mpileup -B -f %s {} > {}.mpileup"' % (PATH_TO_REFERENCE_GENOME_HG19)
+    cmd_call = ' "samtools mpileup -B -f %s {} > {}.mpileup"' % PATH_TO_REFERENCE_GENOME_HG19
     cmd_files = " ::: " + " ".join([os.path.join(tmp_path, os.path.basename(x)) for x in nonempty_chunks])
     cmd = cmd_parallel + cmd_call + cmd_files
     os.system(cmd)
     # Listing mpileup files and excluding empty ones
+    print('Calling variants')
     mpileup_files = [os.path.join(tmp_path, x) for x in os.listdir(tmp_path) if x.endswith('mpileup')]
     nonempty_mpileups = [x for x in mpileup_files if not os.stat(x).st_size == 0]
     cmd_files = " ::: " + " ".join(nonempty_mpileups)
@@ -98,6 +100,7 @@ def call_variants_parallel(bam_chunk_list, tmp_path, n_cores):
 
 def split_bam(bam_file, output_dir, chromosome_sizes, chunk_length):
     """Split the BAM file into chunks of specified length. The input BAM file must be sorted."""
+    print('Splitting BAM file: %s' % bam_file)
     for key, value in chromosome_sizes.items():
         # Ranges
         ranges_start = range(0, value, chunk_length)
@@ -129,6 +132,7 @@ def create_tmp_directory(path_basename):
 
     # Creating the directory
     new_path = os.path.join(path_basename, random_name)
+    print('Created tmp directory: %s' % new_path)
     os.system("mkdir %s " % new_path)
     return new_path
 
@@ -142,9 +146,9 @@ def get_args():
                         required=True)
     parser.add_argument('--chunk_length', help=("Length (bp) of the genomic sequence that is used to split"
                                                 " input BAM files to chunks. Default: 10,000,000bp."),
-                        required=True, default=10000000, type=int)
+                        required=False, default=10000000, type=int)
     parser.add_argument('--n_cores', help='Number of processor cores to use for processing. Default: 2',
-                        required=True, default=2, type=int)
+                        required=False, default=2, type=int)
     return vars(parser.parse_args())
 
 
