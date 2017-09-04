@@ -1,0 +1,123 @@
+/*
+	R Color Viewer styles
+*/
+
+
+/*
+	Table of Contents
+	0) General
+	1) Header
+	2) Footer
+*/
+
+
+
+/*
+	0) GENERAL
+*/
+body {
+	background-color: #E1E2E1;
+	font-weight: 300;
+}
+div {
+	border-radius: 4px;
+}
+.main-content {
+	max-width: 1400px;
+}
+h3 {
+	margin-top: 5px;
+}
+
+
+/*
+	1) HEADER
+*/
+.myheader {
+	padding: 50px;
+	text-align: center;
+/*	background: linear-gradient(45deg,#4d9abf 0,#00c7b7 100%);
+	background: -moz-linear-gradient(45deg,#4d9abf 0,#00c7b7 100%);
+    background: -webkit-linear-gradient(45deg,#4d9abf 0,#00c7b7 100%);*/
+    color: #555;
+    box-shadow: 8px 0px 5px #555;
+    background: linear-gradient(45deg,#F3E3D3 0,#4A9FD4 100%);
+	background: -moz-linear-gradient(45deg,#F3E3D3 0,#4A9FD4 100%);
+    background: -webkit-linear-gradient(45deg,#F3E3D3 0,#4A9FD4 100%);
+
+}
+div.myheader {
+	margin-bottom: 30px;
+}
+.myheader-h1 {
+	font-size: 60px;
+	display: inline-block;
+	padding-right: 30px;
+}
+.myheader-h2 {
+	font-weight: 300;
+	display: inline-block;
+	width: 170px;
+	border-left: 1px solid #555;
+	border-radius: 0px;
+	padding-left: 30px;
+	text-align:left;
+}
+.myheader-content {
+	margin: 0 auto;
+	width: 500px;
+}
+.myheader-content > p {
+	text-align: center;
+}
+.topheader > a {
+	display: inline-block;
+	border: 1px solid white;
+	padding: 10px;
+	color: white;
+	margin: 3px;
+	-webkit-transition: all 0.2s ease-out;
+    -moz-transition: all 0.2s ease-out;
+    -o-transition: all 0.2s ease-out;
+    transition: all 0.2s ease-out;
+}
+.topheader > a:hover {
+	text-decoration: none;
+	/*border: 2px solid white;*/
+	background-color: white;
+	color: grey;
+}
+
+
+/*
+	2) FOOTER
+*/
+.footer {
+    padding: 40px;
+    bottom:0;
+    width:100%;
+    margin: 0 auto;
+    margin-bottom: 50px;
+    text-align: left;
+    margin-top: 50px;
+    max-width: 1400px;
+}
+.footer p {
+	text-align: left;
+}
+
+
+
+
+
+
+
+/*
+	N) MISC
+*/
+.right {
+	float:right;
+}
+.fheight {
+	height: 100%;
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Including libraries and styles -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" type="text/css">
+    <!-- Custom javascript -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+</head>
+<body>
+
+
+<!-- NEW HEADER -->
+<div class="myheader">
+  <div class="myheader-h1">Parallel variants</div>
+  <div class="myheader-h2">Tracker for parallel variant pipeline</div>
+  <div class="myheader-content">
+    <p>This is a simple tracker web app for variant calls running on the server.</p>
+  </div>
+</div>
+
+
+<!-- CONTENT -->
+<div class="container-fluid main-content">
+	<div class="row">
+
+        <h2>Run table</h2>
+        <table id="run-table" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Run ID</th>
+                <th>Temporary folder</th>
+                <th>Split BAM file count</th>
+                <th>Mpileup count</th>
+                <th>VCF count</th>
+            </tr>
+        </thead>
+    </table>
+
+		<!-- MENU PANEL -->
+		<div class="col-md-12 menubar">
+        </div>
+
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div class="container-fluid footer">
+        &copy; Ville Kytölä 2017
+</div>
+</body>
+</html>
