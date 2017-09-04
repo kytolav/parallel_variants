@@ -5,15 +5,14 @@
 import argparse
 import uuid
 import os
-import math
 
 
 VARIANT_OUTPUT_DIRECTORY_BASENAME = 'variants'
 TEMPORARY_FILES_DIRECTORY_BASENAME = 'tmp'
 NUMBER_OF_CORES = 2
 CHUNK_LENGTH = 10000000
-PATH_TO_REFERENCE_GENOME_HG19 = '/data/csb/organisms/homo_sapiens/hg19.fa'
-PATH_TO_VARSCAN = '/data/csb/tools/VarScan.v2.3.9.jar'
+PATH_TO_REFERENCE_GENOME_HG19 = '/Users/kytolav/projects/parallel_variants/references/hg19.fa'
+PATH_TO_VARSCAN = '/Users/kytolav/tools/VarScan.v2.3.9.jar'
 HG19_CHROMOSOME_SIZES = {
     'chr1': 249250621,
     'chr2': 243199373,
@@ -42,7 +41,8 @@ HG19_CHROMOSOME_SIZES = {
     'chrMT': 16571}
 
 
-def run_analysis(bam_list, out_dir = VARIANT_OUTPUT_DIRECTORY_BASENAME):
+def run_analysis(bam_list, chunk_length=CHUNK_LENGTH, n_cores=NUMBER_OF_CORES,
+                 out_dir=VARIANT_OUTPUT_DIRECTORY_BASENAME):
     """Launch parallel variant calling for all input files."""
     # Check for required arguments
     if not bam_list:
@@ -57,10 +57,10 @@ def run_analysis(bam_list, out_dir = VARIANT_OUTPUT_DIRECTORY_BASENAME):
         tmp_path = create_tmp_directory(TEMPORARY_FILES_DIRECTORY_BASENAME)
 
         # Splitting the bam
-        bam_chunk_list = split_bam(bam_file, tmp_path, HG19_CHROMOSOME_SIZES, CHUNK_LENGTH)
+        bam_chunk_list = split_bam(bam_file, tmp_path, HG19_CHROMOSOME_SIZES, chunk_length)
 
         # Running variant calling in parallel using simple unix parallel
-        call_variants_parallel(bam_chunk_list, tmp_path)
+        call_variants_parallel(bam_chunk_list, tmp_path, n_cores)
 
         # Gathering results into single VCF
         gather_results(bam_file, tmp_path, VARIANT_OUTPUT_DIRECTORY_BASENAME)
@@ -78,11 +78,11 @@ def gather_results(bam_file, tmp_path, output_directory):
     os.system(cmd)
 
 
-def call_variants_parallel(bam_chunk_list, tmp_path):
+def call_variants_parallel(bam_chunk_list, tmp_path, n_cores):
     """Calls variants using a parallel VarScan launcher"""
     # Ignoring empty files
     nonempty_chunks = [x for x in bam_chunk_list if not os.stat(os.path.join(tmp_path, x)).st_size == 0]
-    cmd_parallel = "parallel -j %d" % NUMBER_OF_CORES
+    cmd_parallel = "parallel -j %d" % n_cores
     cmd_call = ' "samtools mpileup -B -f %s {} > {}.mpileup"' % (PATH_TO_REFERENCE_GENOME_HG19)
     cmd_files = " ::: " + " ".join([os.path.join(tmp_path, os.path.basename(x)) for x in nonempty_chunks])
     cmd = cmd_parallel + cmd_call + cmd_files
@@ -91,7 +91,7 @@ def call_variants_parallel(bam_chunk_list, tmp_path):
     mpileup_files = [os.path.join(tmp_path, x) for x in os.listdir(tmp_path) if x.endswith('mpileup')]
     nonempty_mpileups = [x for x in mpileup_files if not os.stat(x).st_size == 0]
     cmd_files = " ::: " + " ".join(nonempty_mpileups)
-    cmd_call = ' "java -jar %s mpileup2snp {} --output-vcf 1 > {}.vcf"' % (PATH_TO_VARSCAN)
+    cmd_call = ' "java -jar %s mpileup2snp {} --output-vcf 1 > {}.vcf"' % PATH_TO_VARSCAN
     cmd = cmd_parallel + cmd_call + cmd_files
     os.system(cmd)
 
@@ -107,28 +107,6 @@ def split_bam(bam_file, output_dir, chromosome_sizes, chunk_length):
             os.system(cmd)
     # Listing files
     return [x for x in os.listdir(output_dir) if 'chr' in x]
-
-
-    # Saving the BAM header
-    cmd = "samtools view -H %s > %s/header.txt" % (bam_file, output_dir)
-    os.system(cmd)
-    # Counting lines of the file
-    line_count = bam_line_count(bam_file)
-    lines_per_chunk = math.ceil(line_count * 1.0 / number_of_chunks)
-    # Splitting the file with samtools and unix tools
-    cmd = "samtools view %s |split -l %d - %s/chunk_" % (bam_file, lines_per_chunk, output_dir)
-    os.system(cmd)
-    # Appending header to each chunk
-    chunks = [os.path.realpath(x) for x in os.listdir(output_dir) if 'header' not in x]
-    for chunk in chunks:
-        chunk_base = os.path.basename(chunk)
-        cmd = "cat %s/header.txt %s/%s > %s/%s_tmp" % (output_dir, output_dir, chunk_base,
-                                                                  output_dir, chunk_base)
-        os.system(cmd)
-        # Renaming
-        cmd = "mv %s/%s_tmp %s/%s" % (output_dir, chunk_base, output_dir, chunk_base)
-        os.system(cmd)
-    return chunks
 
 
 def bam_line_count(bam_file):
@@ -162,6 +140,11 @@ def get_args():
     parser.add_argument('--bam_list', help='Space separated paths to FASTQ '
                         'input files. At least one is required.', nargs='+',
                         required=True)
+    parser.add_argument('--chunk_length', help=("Length (bp) of the genomic sequence that is used to split"
+                                                " input BAM files to chunks. Default: 10,000,000bp."),
+                        required=True, default=10000000, type=int)
+    parser.add_argument('--n_cores', help='Number of processor cores to use for processing. Default: 2',
+                        required=True, default=2, type=int)
     return vars(parser.parse_args())
 
 

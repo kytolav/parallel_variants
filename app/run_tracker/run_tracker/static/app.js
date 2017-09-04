@@ -32,6 +32,6 @@ $(document).ready(function() {
     // Periodical AJAX for fetching the data table contents
     var intervalID = setInterval(function(){
         // Fetching new table data from server
-        ajaxQuery({'get_data': 1}, updateTable, "http://compbio.uta.fi:8008/table") //"http://localhost:8008/table")
+        ajaxQuery({'get_data': 1}, updateTable, "http://localhost:8008/table")
     }, 5000);
 } );

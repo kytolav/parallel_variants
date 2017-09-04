@@ -2,7 +2,7 @@
 
 import json
 import os
-from flask import Flask, url_for, render_template, request, session, escape, redirect
+from flask import render_template
 
 from . import app
 
@@ -12,6 +12,7 @@ TMP_DIRECTORY_PATH = "/Users/kytolav/projects/parallel_variants/tmp"
 @app.route("/", methods=['GET', 'POST'])
 def index():
     return render_template('app.html')
+
 
 @app.route("/table", methods=['POST'])
 def post_table_data():
